@@ -2,6 +2,7 @@ package dev.system.tinyurl.Repository;
 
 import dev.system.tinyurl.url.UrlMapping;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -14,4 +15,8 @@ public interface UrlMappingRepository extends JpaRepository<UrlMapping, Long> {
     @Query(value = "SELECT * FROM urls WHERE md5(long_url) = md5(:longUrl) AND long_url = :longUrl LIMIT 1",
             nativeQuery = true)
     Optional<UrlMapping> findByLongUrl(@Param("longUrl") String longUrl);
+
+    @Modifying
+    @Query("UPDATE UrlMapping u SET u.clickCount = u.clickCount + :delta WHERE u.shortKey = :shortKey")
+    int incrementClickCount(@Param("shortKey") String shortKey, @Param("delta") long delta);
 }

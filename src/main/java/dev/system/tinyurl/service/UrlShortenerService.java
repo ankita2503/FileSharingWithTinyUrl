@@ -123,4 +123,9 @@ public class UrlShortenerService {
     private static ShortenResult toResult(UrlMapping m, boolean created) {
         return new ShortenResult(m.getShortKey(), m.getLongUrl(), m.getExpiresAt(), created);
     }
+
+    @Transactional(readOnly = true)
+    public UrlMapping metadata(String shortKey) {
+        return repo.findByShortKey(shortKey).orElseThrow(() -> new NotFoundException(shortKey));
+    }
 }
