@@ -3,7 +3,6 @@ package dev.system.tinyurl.controller;
 import dev.system.tinyurl.Exceptions.ApiExceptionHandler;
 import dev.system.tinyurl.Exceptions.NotFoundException;
 import dev.system.tinyurl.analytics.ClickCounter;
-
 import dev.system.tinyurl.ratelimiter.RateLimitFilter;
 import dev.system.tinyurl.service.UrlShortenerService;
 import org.junit.jupiter.api.Test;
@@ -22,15 +21,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(controllers = RedirectController.class,
         excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = RateLimitFilter.class))
-@Import(ApiExceptionHandler.class)
+@Import({ApiExceptionHandler.class, MeterTestConfig.class})
 class RedirectControllerTest {
 
-    @Autowired
-    MockMvc mvc;
+    @Autowired MockMvc mvc;
     @MockitoBean
     UrlShortenerService service;
-    @MockitoBean
-    ClickCounter clickCounter;
+    @MockitoBean ClickCounter clickCounter;
 
     @Test
     void successfulRedirectRecordsClick() throws Exception {

@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: tinyurl, namespace: tinyurl }
+spec:
+  replicas: 2
+  selector: { matchLabels: { app: tinyurl } }
+  strategy:
+    type: RollingUpdate
+    rollingUpdate: { maxUnavailable: 0, maxSurge: 1 }
+  template:
+    metadata: { labels: { app: tinyurl } }
+    spec:
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: app
+          image: tinyurl:local
+          imagePullPolicy: IfNotPresent
+          ports: [{ containerPort: 8080, name: http }]
+          envFrom:
+            - configMapRef: { name: tinyurl-config }
+          env:
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom: { secretKeyRef: { name: tinyurl-db, key: POSTGRES_USER } }
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom: { secretKeyRef: { name: tinyurl-db, key: POSTGRES_PASSWORD } }
+          startupProbe:
+            httpGet: { path: /actuator/health/liveness, port: http }
+            failureThreshold: 30
+            periodSeconds: 2
+          readinessProbe:
+            httpGet: { path: /actuator/health/readiness, port: http }
+            periodSeconds: 5
+          livenessProbe:
+            httpGet: { path: /actuator/health/liveness, port: http }
+            periodSeconds: 10
+          lifecycle:
+            preStop:
+              exec: { command: ["sh", "-c", "sleep 5"] }   # let the Service drop us before shutdown
+          resources:
+            requests: { cpu: 250m, memory: 384Mi }
+            limits: { memory: 768Mi }
+---
+apiVersion: v1
+kind: Service
+metadata: { name: tinyurl, namespace: tinyurl }
+spec:
+  selector: { app: tinyurl }
+  ports: [{ port: 80, targetPort: http }]
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata: { name: tinyurl, namespace: tinyurl }
+spec:
+  scaleTargetRef: { apiVersion: apps/v1, kind: Deployment, name: tinyurl }
+  minReplicas: 2
+  maxReplicas: 6
+  metrics:
+    - type: Resource
+      resource: { name: cpu, target: { type: Utilization, averageUtilization: 70 } }
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata: { name: tinyurl, namespace: tinyurl }
+spec:
+  minAvailable: 1
+  selector: { matchLabels: { app: tinyurl } }

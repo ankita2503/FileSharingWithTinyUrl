@@ -6,11 +6,15 @@ import dev.system.tinyurl.api.AppProperties;
 import dev.system.tinyurl.ratelimiter.RateLimitFilter;
 import dev.system.tinyurl.service.UrlShortenerService;
 import dev.system.tinyurl.url.*;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
  // Boot 4 alt: org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
@@ -39,6 +43,14 @@ class UrlApiControllerTest {
 
     @MockitoBean
     ClickCounter clickCounter;
+
+    @TestConfiguration
+    static class Meters {
+        @Bean
+        MeterRegistry meterRegistry() {
+            return new SimpleMeterRegistry();
+        }
+    }
 
     private static final String LONG = "https://example.com/page";
 

@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata: { name: tinyurl-config, namespace: tinyurl }
+data:
+  SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/tinyurl
+  SPRING_DATA_REDIS_HOST: redis
+  TINYURL_APP_BASE_URL: http://localhost:8080
+  TINYURL_RATELIMIT_CAPACITY: "60"
+  SERVER_FORWARD_HEADERS_STRATEGY: framework
+---
+apiVersion: v1
+kind: Secret
+metadata: { name: tinyurl-db, namespace: tinyurl }
+type: Opaque
+stringData:
+  POSTGRES_USER: tinyurl
+  POSTGRES_PASSWORD: change-me-in-real-clusters
+  POSTGRES_DB: tinyurl

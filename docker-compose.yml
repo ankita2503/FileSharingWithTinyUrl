@@ -1,0 +1,31 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: tinyurl
+      POSTGRES_USER: tinyurl
+      POSTGRES_PASSWORD: tinyurl
+    ports: ["5432:5432"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tinyurl"]
+      interval: 5s
+      retries: 10
+  redis:
+    image: redis:7-alpine
+    ports: ["6379:6379"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      retries: 10
+  app:
+    build: .
+    ports: ["8080:8080"]
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/tinyurl
+      SPRING_DATASOURCE_USERNAME: tinyurl
+      SPRING_DATASOURCE_PASSWORD: tinyurl
+      SPRING_DATA_REDIS_HOST: redis
+      TINYURL_APP_BASE_URL: http://localhost:8080
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
