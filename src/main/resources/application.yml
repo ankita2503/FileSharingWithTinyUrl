@@ -38,3 +38,12 @@ management:
 logging:
   pattern:
     level: "%5p [%X{requestId:-}]"
+tinyurl:
+  storage:
+    endpoint: ${TINYURL_STORAGE_ENDPOINT:http://localhost:9000}
+    bucket: ${TINYURL_STORAGE_BUCKET:tinyurl-files}
+    access-key: ${TINYURL_STORAGE_ACCESS_KEY:minioadmin}
+    secret-key: ${TINYURL_STORAGE_SECRET_KEY:minioadmin}
+    upload-url-ttl: 15m
+    download-url-ttl: 60s
+    max-file-size-bytes: 104857600

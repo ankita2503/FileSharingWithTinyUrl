@@ -1,0 +1,22 @@
+{
+  "name": "tinyurl",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu-24.04",
+  "features": {
+    "ghcr.io/devcontainers/features/java:1": {
+      "version": "22",
+      "installGradle": false
+    },
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+  },
+  "forwardPorts": [8080, 9001],
+  "portsAttributes": {
+    "8080": { "label": "tinyurl-api" },
+    "9001": { "label": "minio-console" }
+  },
+  "postCreateCommand": "./gradlew --no-daemon build -x test",
+  "customizations": {
+    "vscode": {
+      "extensions": ["vscjava.vscode-java-pack", "vscjava.vscode-gradle"]
+    }
+  }
+}
