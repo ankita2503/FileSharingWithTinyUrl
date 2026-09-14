@@ -1,4 +1,5 @@
 services:
+
   postgres:
     image: postgres:16-alpine
     environment:
@@ -26,8 +27,10 @@ services:
       timeout: 3s
       retries: 10
 
+  # MinIO moved off Docker Hub in September 2026; quay.io is the project's own registry.
+  # Pinned to a release that still ships the web console on :9001.
   minio:
-    image: minio/minio
+    image: quay.io/minio/minio:RELEASE.2025-02-18T16-25-55Z
     command: ["server", "/data", "--console-address", ":9001"]
     environment:
       MINIO_ROOT_USER: minioadmin
@@ -54,7 +57,11 @@ services:
       SPRING_DATA_REDIS_HOST: redis
       SPRING_DATA_REDIS_PORT: "6379"
       TINYURL_APP_BASE_URL: http://localhost:8080
+      # Internal endpoint: what the app itself calls (head, delete, bucket create).
       TINYURL_STORAGE_ENDPOINT: http://minio:9000
+      # Public endpoint: what presigned URLs are signed for, since the browser
+      # cannot resolve the "minio" hostname on the compose network.
+      TINYURL_STORAGE_PUBLIC_ENDPOINT: http://localhost:9000
       TINYURL_STORAGE_BUCKET: tinyurl-files
       TINYURL_STORAGE_ACCESS_KEY: minioadmin
       TINYURL_STORAGE_SECRET_KEY: minioadmin
@@ -64,7 +71,6 @@ services:
       redis:
         condition: service_healthy
       minio:
-        image: quay.io/minio/minio:RELEASE.2025-02-18T16-25-55Z
         condition: service_healthy
 
 volumes:
