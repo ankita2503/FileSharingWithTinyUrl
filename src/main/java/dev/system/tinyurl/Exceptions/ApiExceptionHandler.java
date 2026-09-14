@@ -5,6 +5,7 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -65,5 +66,59 @@ public class ApiExceptionHandler {
         var pd = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, detail);
         pd.setProperty("code", "VALIDATION_FAILED");
         return pd;
+    }
+
+    @ExceptionHandler(FileShareNotFoundException.class)
+    ProblemDetail fileNotFound(FileShareNotFoundException e) {
+        return problem(HttpStatus.NOT_FOUND, "FILE_NOT_FOUND", e);
+    }
+
+    @ExceptionHandler(UploadNotCompletedException.class)
+    ProblemDetail uploadNotCompleted(UploadNotCompletedException e) {
+        return problem(HttpStatus.CONFLICT, "UPLOAD_NOT_COMPLETED", e);
+    }
+
+    @ExceptionHandler(FileTooLargeException.class)
+    ProblemDetail tooLarge(FileTooLargeException e) {
+        return problem(HttpStatus.PAYLOAD_TOO_LARGE, "FILE_TOO_LARGE", e);
+    }
+
+    @ExceptionHandler(InvalidShareRequestException.class)
+    ProblemDetail invalidShare(InvalidShareRequestException e) {
+        return problem(HttpStatus.BAD_REQUEST, "INVALID_SHARE_REQUEST", e);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    ProblemDetail unreadable(HttpMessageNotReadableException e) {
+        Throwable root = e;
+        while (root.getCause() != null) root = root.getCause();
+        var pd = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST,
+                root.getClass().getSimpleName() + ": " + root.getMessage());
+        pd.setProperty("code", "MALFORMED_REQUEST");
+        return pd;
+    }
+
+    public static class FileShareNotFoundException extends RuntimeException {
+        public FileShareNotFoundException(String key) {
+            super("No file share for key '" + key + "'");
+        }
+    }
+
+    public static class UploadNotCompletedException extends RuntimeException {
+        public UploadNotCompletedException(String key) {
+            super("No uploaded object found for share '" + key + "'");
+        }
+    }
+
+    public static class FileTooLargeException extends RuntimeException {
+        public FileTooLargeException(long actual, long max) {
+            super("File is " + actual + " bytes, limit is " + max);
+        }
+    }
+
+    public static class InvalidShareRequestException extends RuntimeException {
+        public InvalidShareRequestException(String message) {
+            super(message);
+        }
     }
 }

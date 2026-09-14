@@ -33,7 +33,10 @@ public class TestcontainersConfiguration {
 
     @Bean
     DynamicPropertyRegistrar minioProperties(GenericContainer<?> minio) {
-        return registry -> registry.add("tinyurl.storage.endpoint",
-                () -> "http://" + minio.getHost() + ":" + minio.getMappedPort(9000));
+        return registry -> {
+            String url = "http://" + minio.getHost() + ":" + minio.getMappedPort(9000);
+            registry.add("tinyurl.storage.endpoint", () -> url);
+            registry.add("tinyurl.storage.public-endpoint", () -> url);
+        };
     }
 }

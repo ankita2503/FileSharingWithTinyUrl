@@ -47,3 +47,7 @@ tinyurl:
     upload-url-ttl: 15m
     download-url-ttl: 60s
     max-file-size-bytes: 104857600
+  files:
+    default-ttl: 24h
+    max-ttl: 7d
+    abandoned-after: 1h

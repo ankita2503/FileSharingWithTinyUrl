@@ -11,7 +11,8 @@ import java.time.Duration;
  */
 @ConfigurationProperties("tinyurl.storage")
 public record StorageProperties(
-        String endpoint,
+        String endpoint,          // internal: what the app calls (http://minio:9000)
+        String publicEndpoint,    // external: what presigned URLs point at (http://localhost:9000)
         String region,
         String bucket,
         String accessKey,
@@ -23,6 +24,7 @@ public record StorageProperties(
     public StorageProperties {
         if (region == null || region.isBlank()) region = "us-east-1";
         if (bucket == null || bucket.isBlank()) bucket = "tinyurl-files";
+        if (publicEndpoint == null || publicEndpoint.isBlank()) publicEndpoint = endpoint;
         if (uploadUrlTtl == null) uploadUrlTtl = Duration.ofMinutes(15);
         if (downloadUrlTtl == null) downloadUrlTtl = Duration.ofSeconds(60);
         if (maxFileSizeBytes <= 0) maxFileSizeBytes = 100L * 1024 * 1024;

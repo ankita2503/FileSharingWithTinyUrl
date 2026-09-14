@@ -47,8 +47,8 @@ public class StorageConfiguration {
                 .region(Region.of(props.region()))
                 .credentialsProvider(creds)
                 .serviceConfiguration(PATH_STYLE);
-        if (props.endpoint() != null && !props.endpoint().isBlank()) {
-            b.endpointOverride(URI.create(props.endpoint()));
+        if (props.publicEndpoint() != null && !props.publicEndpoint().isBlank()) {
+            b.endpointOverride(URI.create(props.publicEndpoint()));   // <-- public, not internal
         }
         return b.build();
     }
