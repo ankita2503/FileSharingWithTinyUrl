@@ -25,7 +25,8 @@ public class FileShareService {
 
     private static final Logger log = LoggerFactory.getLogger(FileShareService.class);
 
-    public record InitiateResult(FileShare share, URI uploadUrl, String contentType) {}
+    public record InitiateResult(FileShare share, URI uploadUrl, String contentType) {
+    }
 
     private final FileShareRepository repo;
     private final FileStorage storage;
@@ -163,5 +164,41 @@ public class FileShareService {
             repo.saveAndFlush(share);
             log.info("Share {} revoked", secretKey);
         }
+    }
+
+    /**
+     * Issues a short-lived presigned GET and counts the download.
+     * <p>
+     * Burn-after-read and exhausted shares are marked DELETED immediately so no further
+     * URLs can be issued, but the object itself is left for the sweeper to remove after
+     * a grace period. Deleting the bytes here would mean a dropped connection destroys
+     * the file: the link should be single-*attempt*, not single-*success*.
+     */
+    @Transactional
+    public URI issueDownload(String secretKey) {
+        var share = repo.findBySecretKey(secretKey)
+                .orElseThrow(() -> new ApiExceptionHandler.FileShareNotFoundException(secretKey));
+
+        Instant now = clock.instant();
+
+        if (share.getStatus() == FileShare.Status.PENDING) {
+            throw new ApiExceptionHandler.UploadNotCompletedException(secretKey);
+        }
+        if (share.getStatus() == FileShare.Status.DELETED
+                || share.isExpired(now)
+                || share.isExhausted()) {
+            throw new ShareGoneException(secretKey);
+        }
+
+        share.recordDownload();
+        URI url = storage.presignDownload(share.getObjectKey(), share.getFilename());
+
+        if (share.isBurnAfterRead() || share.isExhausted()) {
+            share.markDeleted(now);
+            log.info("Share {} consumed after download {}", secretKey, share.getDownloadCount());
+        }
+
+        repo.saveAndFlush(share);
+        return url;
     }
 }

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Shared links must never be indexed or previewed by crawlers. -->
+    <meta name="robots" content="noindex, nofollow, noarchive">
+    <meta name="referrer" content="no-referrer">
+    <title>Shared file</title>
+    <style>
+        :root { color-scheme: light dark; }
+        body { font-family: system-ui, -apple-system, sans-serif; margin: 0;
+               display: flex; min-height: 100vh; align-items: center; justify-content: center;
+               background: #f6f7f9; color: #1a1a1a; }
+        .card { background: #fff; border-radius: 12px; padding: 2rem; max-width: 26rem;
+                width: calc(100% - 2rem); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+        h1 { font-size: 1.1rem; margin: 0 0 .25rem; word-break: break-all; }
+        .meta { color: #666; font-size: .875rem; margin: 0 0 1.5rem; }
+        a.button { display: block; text-align: center; background: #1a1a1a; color: #fff;
+                   padding: .75rem 1rem; border-radius: 8px; text-decoration: none; font-weight: 600; }
+        a.button:hover { background: #333; }
+        .notice { margin-top: 1rem; font-size: .8125rem; color: #666; }
+        .warn { color: #b3261e; font-weight: 600; }
+    </style>
+</head>
+<body>
+<div class="card">
+    <!-- th:text, never th:utext: the filename is user-supplied. -->
+    <h1 th:text="${filename}">file.pdf</h1>
+    <p class="meta" th:text="${size}">1.2 MB</p>
+
+    <a class="button" th:href="${downloadUrl}">Download</a>
+
+    <p class="notice">
+        This link expires in <span th:text="${expiresIn}">24 hours</span>.
+        <span th:if="${remaining != null and !burnAfterRead}">
+            <span th:text="${remaining}">3</span> download(s) left.
+        </span>
+    </p>
+    <p class="notice warn" th:if="${burnAfterRead}">
+        This file is deleted after one download.
+    </p>
+</div>
+</body>
+</html>

@@ -61,6 +61,22 @@ public class FileShare implements Persistable<Long> {
     @Column(name = "expires_at", nullable = false)
     private Instant expiresAt;
 
+    @Column(name = "deleted_at")
+    private Instant deletedAt;
+
+    /** Marks the share unusable immediately; the bytes are removed later by the sweeper. */
+    public void markDeleted(Instant now) {
+        this.status = Status.DELETED;
+        this.deletedAt = now;
+    }
+
+    public Instant getDeletedAt() { return deletedAt; }
+
+    /** Remaining downloads, or null when unlimited. */
+    public Integer remainingDownloads() {
+        return maxDownloads == null ? null : Math.max(0, maxDownloads - downloadCount);
+    }
+
     @Transient
     private boolean isNew = true;
 

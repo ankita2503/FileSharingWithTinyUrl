@@ -14,11 +14,17 @@ public interface FileShareRepository extends JpaRepository<FileShare, Long> {
 
     Optional<FileShare> findBySecretKey(String secretKey);
 
-    /** Expired shares whose object still needs removing. */
+    /** Live shares whose expiry has passed; their objects still need removing. */
     @Query("SELECT f FROM FileShare f WHERE f.expiresAt < :now AND f.status <> 'DELETED'")
     List<FileShare> findExpired(@Param("now") Instant now, Limit limit);
 
-    /** Uploads that were initiated but never completed; their objects may be orphaned. */
+    /** Deleted shares past the grace period: purge bytes and drop the row. */
+    @Query("SELECT f FROM FileShare f WHERE f.status = 'DELETED' AND f.deletedAt < :cutoff")
+    List<FileShare> findPurgeable(@Param("cutoff") Instant cutoff, Limit limit);
+
+    /** Uploads initiated but never completed; objects may be orphaned. */
     @Query("SELECT f FROM FileShare f WHERE f.status = 'PENDING' AND f.createdAt < :cutoff")
     List<FileShare> findAbandoned(@Param("cutoff") Instant cutoff, Limit limit);
+
+
 }

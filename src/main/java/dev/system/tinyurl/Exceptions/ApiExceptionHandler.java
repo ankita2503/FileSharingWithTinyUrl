@@ -121,4 +121,9 @@ public class ApiExceptionHandler {
             super(message);
         }
     }
+
+    @ExceptionHandler(ShareGoneException.class)
+    ProblemDetail shareGone(ShareGoneException e) {
+        return problem(HttpStatus.GONE, "SHARE_GONE", e);
+    }
 }

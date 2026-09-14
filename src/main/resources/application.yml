@@ -51,3 +51,5 @@ tinyurl:
     default-ttl: 24h
     max-ttl: 7d
     abandoned-after: 1h
+    purge-grace: 1h
+    sweep-interval: 60s

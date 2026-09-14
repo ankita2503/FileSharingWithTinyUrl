@@ -27,6 +27,7 @@ dependencies {
 	implementation 'org.flywaydb:flyway-database-postgresql'
 	implementation platform('software.amazon.awssdk:bom:2.28.16')
 	implementation 'software.amazon.awssdk:s3'
+	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 	runtimeOnly 'org.postgresql:postgresql'
 	testImplementation 'org.springframework.boot:spring-boot-starter-actuator-test'
 	testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
