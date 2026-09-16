@@ -47,6 +47,7 @@ services:
       retries: 10
 
   app:
+    profiles: ["full"]
     build: .
     ports:
       - "8080:8080"

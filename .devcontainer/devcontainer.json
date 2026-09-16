@@ -10,10 +10,10 @@
   },
   "forwardPorts": [8080, 9001],
   "portsAttributes": {
-    "8080": { "label": "tinyurl-api" },
-    "9001": { "label": "minio-console" }
+    "8080": { "label": "tinyurl-app", "visibility": "public" },
+    "9001": { "label": "minio-console", "visibility": "private" }
   },
-  "postCreateCommand": "./gradlew --no-daemon build -x test",
+  "postCreateCommand": "chmod +x .devcontainer/start-demo.sh demo.sh 2>/dev/null; ./gradlew --no-daemon build -x test",
   "customizations": {
     "vscode": {
       "extensions": ["vscjava.vscode-java-pack", "vscjava.vscode-gradle"]

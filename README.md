@@ -1,4 +1,12 @@
-# TinyURL + Ephemeral File Sharing
+---
+title: TinyURL + Ephemeral File Sharing
+emoji: 🔗
+colorFrom: blue
+colorTo: gray
+sdk: docker
+app_port: 7860
+pinned: false
+---
 
 A distributed URL shortener with a temporary file-sharing system built on top of it.
 

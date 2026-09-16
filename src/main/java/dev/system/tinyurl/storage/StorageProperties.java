@@ -19,7 +19,8 @@ public record StorageProperties(
         String secretKey,
         Duration uploadUrlTtl,
         Duration downloadUrlTtl,
-        long maxFileSizeBytes) {
+        long maxFileSizeBytes
+String proxyPublicUrl) {
 
     public StorageProperties {
         if (region == null || region.isBlank()) region = "us-east-1";
@@ -28,5 +29,8 @@ public record StorageProperties(
         if (uploadUrlTtl == null) uploadUrlTtl = Duration.ofMinutes(15);
         if (downloadUrlTtl == null) downloadUrlTtl = Duration.ofSeconds(60);
         if (maxFileSizeBytes <= 0) maxFileSizeBytes = 100L * 1024 * 1024;
+    }
+
+    public String proxyPublicUrl() {
     }
 }
