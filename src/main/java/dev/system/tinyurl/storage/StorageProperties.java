@@ -5,22 +5,24 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import java.time.Duration;
 
 /**
- * @param endpoint        S3-compatible endpoint (MinIO/R2). Null means real AWS S3.
- * @param uploadUrlTtl    generous: large files take time to transfer
- * @param downloadUrlTtl  deliberately short: the URL is the capability
+ * @param endpoint         internal S3 endpoint the application itself calls
+ * @param publicEndpoint   endpoint presigned URLs are signed for (browser-reachable)
+ * @param proxyPublicUrl   when set, URLs are proxied through the app instead of presigned
+ * @param uploadUrlTtl     generous: large files take time to transfer
+ * @param downloadUrlTtl   deliberately short: the URL is the capability
  */
 @ConfigurationProperties("tinyurl.storage")
 public record StorageProperties(
-        String endpoint,          // internal: what the app calls (http://minio:9000)
-        String publicEndpoint,    // external: what presigned URLs point at (http://localhost:9000)
+        String endpoint,
+        String publicEndpoint,
+        String proxyPublicUrl,
         String region,
         String bucket,
         String accessKey,
         String secretKey,
         Duration uploadUrlTtl,
         Duration downloadUrlTtl,
-        long maxFileSizeBytes
-String proxyPublicUrl) {
+        long maxFileSizeBytes) {
 
     public StorageProperties {
         if (region == null || region.isBlank()) region = "us-east-1";
@@ -29,8 +31,5 @@ String proxyPublicUrl) {
         if (uploadUrlTtl == null) uploadUrlTtl = Duration.ofMinutes(15);
         if (downloadUrlTtl == null) downloadUrlTtl = Duration.ofSeconds(60);
         if (maxFileSizeBytes <= 0) maxFileSizeBytes = 100L * 1024 * 1024;
-    }
-
-    public String proxyPublicUrl() {
     }
 }
